@@ -1,25 +1,38 @@
 // initialize the map on the "map" div with a given center and zoom
 var map = new L.Map('map', {
-  zoom: 6,
-  minZoom: 3,
+    zoom: 6,
+    minZoom: 3
 });
 
 // create a new tile layer
 var tileUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-layer = new L.TileLayer(tileUrl, 
-{
-    attribution: 'Maps © <a href=\"www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors',
-    maxZoom: 18
-});
+    layer = new L.TileLayer(tileUrl,
+        {
+            attribution: 'Maps © <a href=\"www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        });
 
 // add the layer to the map
 map.addLayer(layer);
 
-var parisKievLL = [[48.8567, 2.3508], [50.45, 30.523333]];
-var londonParisRomeBerlinBucarest = [[51.507222, -0.1275], [48.8567, 2.3508], 
-[41.9, 12.5], [52.516667, 13.383333], [44.4166,26.1]];
-var londonBrusselFrankfurtAmsterdamLondon = [[51.507222, -0.1275], [50.85, 4.35],
-[50.116667, 8.683333], [52.366667, 4.9], [51.507222, -0.1275]];
+var parisKievLL = [
+    [48.8567, 2.3508],
+    [50.45, 30.523333]
+];
+var londonParisRomeBerlinBucarest = [
+    [51.507222, -0.1275],
+    [48.8567, 2.3508],
+    [41.9, 12.5],
+    [52.516667, 13.383333],
+    [44.4166, 26.1]
+];
+var londonBrusselFrankfurtAmsterdamLondon = [
+    [51.507222, -0.1275],
+    [50.85, 4.35],
+    [50.116667, 8.683333],
+    [52.366667, 4.9],
+    [51.507222, -0.1275]
+];
 var barceloneParisMonaco = [
     [41.385064, 2.173403],
     [48.8567, 2.3508],
@@ -36,14 +49,14 @@ marker1.once('click', function () {
     marker1.start();
     marker1.closePopup();
     marker1.unbindPopup();
-    marker1.on('click', function() {
+    marker1.on('click', function () {
         if (marker1.isRunning()) {
             marker1.pause();
         } else {
             marker1.start();
         }
     });
-    setTimeout(function() {
+    setTimeout(function () {
         marker1.bindPopup('<b>Click me to pause !</b>').openPopup();
     }, 2000);
 });
@@ -58,9 +71,9 @@ var marker2 = L.Marker.movingMarker(londonParisRomeBerlinBucarest,
 L.polyline(londonParisRomeBerlinBucarest, {color: 'red'}).addTo(map);
 
 
-marker2.on('end', function() {
+marker2.on('end', function () {
     marker2.bindPopup('<b>Welcome to Bucarest !</b>', {closeOnClick: false})
-    .openPopup();
+        .openPopup();
 });
 
 //=========================================================================
@@ -73,35 +86,37 @@ marker3.bindPopup('', {closeOnClick: false});
 
 //=========================================================================
 
-var marker4 = L.Marker.movingMarker([[45.816667, 15.983333]], []).addTo(map);
+var marker4 = L.Marker.movingMarker([
+    [45.816667, 15.983333]
+], []).addTo(map);
 
-marker3.on('loop', function(e) {
+marker3.on('loop', function (e) {
     marker3.loops++;
-    if (e.elapsedTime < 50) {   
+    if (e.elapsedTime < 50) {
         marker3.getPopup().setContent("<b>Loop: " + marker3.loops + "</b>")
         marker3.openPopup();
-        setTimeout(function() {
+        setTimeout(function () {
             marker3.closePopup();
 
-            if (! marker1.isEnded()) {
+            if (!marker1.isEnded()) {
                 marker1.openPopup();
             } else {
                 if (marker4.getLatLng().equals([45.816667, 15.983333])) {
                     marker4.bindPopup('Click on the map to move me !');
-                    marker4.openPopup(); 
+                    marker4.openPopup();
                 }
-                
+
             }
-            
+
         }, 2000);
     }
 });
 
-map.on("click", function(e) {
+map.on("click", function (e) {
     marker4.moveTo(e.latlng, 2000);
 });
 
 //=========================================================================
 
-var marker5 = L.Marker.movingMarker(barceloneParisMonaco, 10000, {autostart: true, reverse: true}).addTo(map);
+var marker5 = L.Marker.movingMarker(barceloneParisMonaco, 10000, {autostart: true, reverse: true, waitingReverse:5000}).addTo(map);
 L.polyline(barceloneParisMonaco, {color: 'green'}).addTo(map);
