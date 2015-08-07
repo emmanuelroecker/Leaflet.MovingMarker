@@ -18,6 +18,8 @@ L.Marker.MovingMarker = L.Marker.extend({
     options: {
         autostart: false,
         loop: false,
+        reverse: false,
+        waitingReverse: 0
     },
 
     initialize: function (latlngs, durations, options) {
@@ -97,6 +99,7 @@ L.Marker.MovingMarker = L.Marker.extend({
         this._state = L.Marker.MovingMarker.notStartedState;
         this.start();
         this.options.loop = false;
+        this.options.reverse = false;
     },
 
     addStation: function(pointIndex, duration) {
@@ -128,7 +131,6 @@ L.Marker.MovingMarker = L.Marker.extend({
 
         return durations;
     },
-
     _startAnimation: function() {
         this._startTime = Date.now();
         this._state = L.Marker.MovingMarker.runState;
@@ -177,6 +179,7 @@ L.Marker.MovingMarker = L.Marker.extend({
 
         var lineIndex = this._currentIndex;
         var lineDuration = this._currentDuration;
+        var self = this;
 
         while (elapsedTime > lineDuration) {
             //substract time of the current line
@@ -188,7 +191,23 @@ L.Marker.MovingMarker = L.Marker.extend({
 
                 if (this.options.loop) {
                     lineIndex = 0;
-                    this.fire('loop', {elapsedTime: elapsedTime});                        
+                    this.fire('loop', {elapsedTime: elapsedTime});
+                } else if (this.options.reverse) {
+                    if (this.options.waitingReverse > 0) {
+                        this.setLatLng(this._latlngs[this._latlngs.length - 1]);
+                        this.stop(elapsedTime);
+                        setTimeout(function() {
+                            self._latlngs = self._latlngs.reverse();
+                            self._durations = self._durations.reverse();
+                            self.start();
+                        }, this.options.waitingReverse);
+                        return null;
+                    } else {
+                        this._latlngs = this._latlngs.reverse();
+                        this._durations = this._durations.reverse();
+                        lineIndex = 0;
+                        this.fire('reverse', {elapsedTime: elapsedTime});
+                    }
                 } else {
                     // place the marker at the end, else it would be at 
                     // the last position
