@@ -17,6 +17,7 @@ L.Marker.MovingMarker = L.Marker.extend({
 
     options: {
         autostart: false,
+        autopause: false,
         loop: false,
         reverse: false,
         resize: false,
@@ -275,50 +276,69 @@ L.Marker.MovingMarker = L.Marker.extend({
      },
      */
 
+    _resizeIcon: function () {
+        var resize = this.options.resize;
+        var zoom = map.getZoom();
+        var iconSize = [];
+        var iconAnchor = [];
+
+        if (zoom >= resize.max.zoom) {
+            iconSize = this._iconSize.map(function (size) {
+                return size * resize.max.size
+            });
+            iconAnchor = this._iconAnchor.map(function (size) {
+                return size * resize.max.size
+            });
+        } else if (zoom <= resize.min.zoom) {
+            iconSize = this._iconSize.map(function (size) {
+                return size * resize.min.size
+            });
+            iconAnchor = this._iconAnchor.map(function (size) {
+                return size * resize.min.size
+            });
+        } else {
+            var dSize = resize.min.size + (zoom - resize.min.zoom) * (resize.max.size - resize.min.size) / (resize.max.zoom - resize.min.zoom);
+
+            iconSize = this._iconSize.map(function (size) {
+                return size * dSize;
+            });
+            iconAnchor = this._iconAnchor.map(function (size) {
+                return size * dSize;
+            });
+        }
+
+        var icon = this.options.icon;
+        icon.options.iconSize = iconSize;
+        icon.options.iconAnchor = iconAnchor;
+        this.setIcon(icon);
+    },
+
     onAdd: function (map) {
         L.Marker.prototype.onAdd.call(this, map);
 
+        if (this.options.resize) {
+            this._resizeIcon();
+        }
+
         var self = this;
+
+        if (this.options.autopause) {
+            this.on("mouseover", function () {
+                self.pause();
+            });
+
+            this.on("mouseout", function () {
+                self.resume();
+            });
+        }
+
         map.on("zoomstart", function () {
             self.pause();
         });
 
         map.on("zoomend", function () {
             if (self.options.resize) {
-                var resize = self.options.resize;
-                var zoom = map.getZoom();
-                var iconSize = [];
-                var iconAnchor = [];
-
-                if (zoom >= resize.max.zoom) {
-                    iconSize = self._iconSize.map(function (size) {
-                        return size * resize.max.size
-                    });
-                    iconAnchor = self._iconAnchor.map(function (size) {
-                        return size * resize.max.size
-                    });
-                } else if (zoom <= resize.min.zoom) {
-                    iconSize = self._iconSize.map(function (size) {
-                        return size * resize.min.size
-                    });
-                    iconAnchor = self._iconAnchor.map(function (size) {
-                        return size * resize.min.size
-                    });
-                } else {
-                    var dSize = resize.min.size + (zoom - resize.min.zoom) * (resize.max.size - resize.min.size) / (resize.max.zoom - resize.min.zoom);
-
-                    iconSize = self._iconSize.map(function (size) {
-                        return size * dSize;
-                    });
-                    iconAnchor = self._iconAnchor.map(function (size) {
-                        return size * dSize;
-                    });
-                }
-
-                var icon = self.options.icon;
-                icon.options.iconSize = iconSize;
-                icon.options.iconAnchor = iconAnchor;
-                self.setIcon(icon);
+                self._resizeIcon();
             }
             self.resume();
         });

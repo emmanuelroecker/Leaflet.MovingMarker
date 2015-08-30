@@ -120,12 +120,13 @@ map.fitBounds(londonParisRomeBerlinBucarest);
  map.on("click", function (e) {
  marker4.moveTo(e.latlng, 2000);
  });
- */
+*/
 
 //=========================================================================
 
 var marker5 = L.Marker.movingMarker(barceloneParisMonaco, 20000,
     {   autostart: true,
+        autopause: true,
         reverse: true,
         waitingReverse: 5000
     }).addTo(map);
