@@ -19,6 +19,7 @@ L.Marker.MovingMarker = L.Marker.extend({
         autostart: false,
         loop: false,
         reverse: false,
+        resize: false,
         waitingReverse: 0
     },
 
@@ -252,6 +253,26 @@ L.Marker.MovingMarker = L.Marker.extend({
         }
     },
 
+    setTransition: function (timems) {
+        if (this._icon) {
+            this._icon.style[L.DomUtil.TRANSITION] = 'width 0.25s cubic-bezier(0,0,0.25,1),height 0.25s cubic-bezier(0,0,0.25,1)';
+        }
+        if (this._shadow) {
+            this._shadow.style[L.DomUtil.TRANSITION] = 'width 0.25s cubic-bezier(0,0,0.25,1),height 0.25s cubic-bezier(0,0,0.25,1)';
+        }
+    },
+
+    /*
+    stopTransition: function () {
+        if (this._icon) {
+            this._icon.style[L.DomUtil.TRANSITION] = '';
+        }
+        if (this._shadow) {
+            this._shadow.style[L.DomUtil.TRANSITION] = '';
+        }
+    },
+    */
+
     onAdd: function (map) {
         L.Marker.prototype.onAdd.call(this, map);
 
@@ -261,6 +282,36 @@ L.Marker.MovingMarker = L.Marker.extend({
         });
 
         map.on("zoomend", function () {
+            if (self.options.resize) {
+                var resize = self.options.resize;
+                var zoom = map.getZoom();
+                var iconSize = [1, 1];
+                var iconAnchor = [1, 1];
+
+                if (zoom >= resize.max.zoom) {
+                    iconSize = resize.max.iconSize;
+                    iconAnchor = resize.max.iconAnchor;
+                } else if (zoom <= resize.min.zoom) {
+                    iconSize = resize.min.iconSize;
+                    iconAnchor = resize.min.iconAnchor;
+                } else {
+                    var diffZoom = resize.max.zoom - resize.min.zoom;
+                    var dSize0 = (resize.max.iconSize[0] - resize.min.iconSize[0]) / diffZoom;
+                    var dSize1 = (resize.max.iconSize[1] - resize.min.iconSize[1]) / diffZoom;
+                    var dAnchor0 = (resize.max.iconAnchor[0] - resize.min.iconAnchor[0]) / diffZoom;
+                    var dAnchor1 = (resize.max.iconAnchor[1] - resize.min.iconAnchor[1]) / diffZoom;
+
+                    iconSize[0] = resize.min.iconSize[0] + (zoom - resize.min.zoom) * dSize0;
+                    iconSize[1] = resize.min.iconSize[1] + (zoom - resize.min.zoom) * dSize1;
+                    iconAnchor[0] = resize.min.iconAnchor[0] + (zoom - resize.min.zoom) * dAnchor0;
+                    iconAnchor[1] = resize.min.iconAnchor[1] + (zoom - resize.min.zoom) * dAnchor1;
+                }
+
+                var icon = self.options.icon;
+                icon.options.iconSize = iconSize;
+                icon.options.iconAnchor = iconAnchor;
+                self.setIcon(icon);
+            }
             self.resume();
         });
 

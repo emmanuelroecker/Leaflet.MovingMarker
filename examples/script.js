@@ -15,6 +15,10 @@ var tileUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 // add the layer to the map
 map.addLayer(layer);
 
+var lyon = [
+    [45.764043, 4.835658999999964]
+];
+
 var parisKievLL = [
     [48.8567, 2.3508],
     [50.45, 30.523333]
@@ -42,81 +46,101 @@ var barceloneParisMonaco = [
 
 map.fitBounds(londonParisRomeBerlinBucarest);
 
-//========================================================================
-var marker1 = L.Marker.movingMarker(parisKievLL, [10000]).addTo(map);
-L.polyline(parisKievLL).addTo(map);
-marker1.once('click', function () {
-    marker1.start();
-    marker1.closePopup();
-    marker1.unbindPopup();
-    marker1.on('click', function () {
-        if (marker1.isRunning()) {
-            marker1.pause();
-        } else {
-            marker1.start();
-        }
-    });
-    setTimeout(function () {
-        marker1.bindPopup('<b>Click me to pause !</b>').openPopup();
-    }, 2000);
-});
+/*
+ //========================================================================
+ var marker1 = L.Marker.movingMarker(parisKievLL, [10000]).addTo(map);
+ L.polyline(parisKievLL).addTo(map);
+ marker1.once('click', function () {
+ marker1.start();
+ marker1.closePopup();
+ marker1.unbindPopup();
+ marker1.on('click', function () {
+ if (marker1.isRunning()) {
+ marker1.pause();
+ } else {
+ marker1.start();
+ }
+ });
+ setTimeout(function () {
+ marker1.bindPopup('<b>Click me to pause !</b>').openPopup();
+ }, 2000);
+ });
 
-marker1.bindPopup('<b>Click me to start !</b>', {closeOnClick: false});
-marker1.openPopup();
+ marker1.bindPopup('<b>Click me to start !</b>', {closeOnClick: false});
+ marker1.openPopup();
 
-//========================================================================
+ //========================================================================
 
-var marker2 = L.Marker.movingMarker(londonParisRomeBerlinBucarest,
-    [3000, 9000, 9000, 4000], {autostart: true}).addTo(map);
-L.polyline(londonParisRomeBerlinBucarest, {color: 'red'}).addTo(map);
+ var marker2 = L.Marker.movingMarker(londonParisRomeBerlinBucarest,
+ [3000, 9000, 9000, 4000], {autostart: true}).addTo(map);
+ L.polyline(londonParisRomeBerlinBucarest, {color: 'red'}).addTo(map);
 
 
-marker2.on('end', function () {
-    marker2.bindPopup('<b>Welcome to Bucarest !</b>', {closeOnClick: false})
-        .openPopup();
-});
+ marker2.on('end', function () {
+ marker2.bindPopup('<b>Welcome to Bucarest !</b>', {closeOnClick: false})
+ .openPopup();
+ });
+
+ //=========================================================================
+
+ var marker3 = L.Marker.movingMarker(londonBrusselFrankfurtAmsterdamLondon,
+ [2000, 2000, 2000, 2000], {autostart: true, loop: true}).addTo(map);
+
+ marker3.loops = 0;
+ marker3.bindPopup('', {closeOnClick: false});
+
+ //=========================================================================
+
+ var marker4 = L.Marker.movingMarker([
+ [45.816667, 15.983333]
+ ], []).addTo(map);
+
+ marker3.on('loop', function (e) {
+ marker3.loops++;
+ if (e.elapsedTime < 50) {
+ marker3.getPopup().setContent("<b>Loop: " + marker3.loops + "</b>");
+ marker3.openPopup();
+ setTimeout(function () {
+ marker3.closePopup();
+
+ if (!marker1.isEnded()) {
+ marker1.openPopup();
+ } else {
+ if (marker4.getLatLng().equals([45.816667, 15.983333])) {
+ marker4.bindPopup('Click on the map to move me !');
+ marker4.openPopup();
+ }
+
+ }
+
+ }, 2000);
+ }
+ });
+
+ map.on("click", function (e) {
+ marker4.moveTo(e.latlng, 2000);
+ });
+ */
 
 //=========================================================================
 
-var marker3 = L.Marker.movingMarker(londonBrusselFrankfurtAmsterdamLondon,
-    [2000, 2000, 2000, 2000], {autostart: true, loop: true}).addTo(map);
-
-marker3.loops = 0;
-marker3.bindPopup('', {closeOnClick: false});
-
-//=========================================================================
-
-var marker4 = L.Marker.movingMarker([
-    [45.816667, 15.983333]
-], []).addTo(map);
-
-marker3.on('loop', function (e) {
-    marker3.loops++;
-    if (e.elapsedTime < 50) {
-        marker3.getPopup().setContent("<b>Loop: " + marker3.loops + "</b>")
-        marker3.openPopup();
-        setTimeout(function () {
-            marker3.closePopup();
-
-            if (!marker1.isEnded()) {
-                marker1.openPopup();
-            } else {
-                if (marker4.getLatLng().equals([45.816667, 15.983333])) {
-                    marker4.bindPopup('Click on the map to move me !');
-                    marker4.openPopup();
-                }
-
-            }
-
-        }, 2000);
-    }
-});
-
-map.on("click", function (e) {
-    marker4.moveTo(e.latlng, 2000);
-});
-
-//=========================================================================
-
-var marker5 = L.Marker.movingMarker(barceloneParisMonaco, 10000, {autostart: true, reverse: true, waitingReverse:5000}).addTo(map);
+var marker5 = L.Marker.movingMarker(barceloneParisMonaco, 20000,
+    {   autostart: true,
+        reverse: true,
+        waitingReverse: 5000
+    }).addTo(map);
 L.polyline(barceloneParisMonaco, {color: 'green'}).addTo(map);
+
+//=========================================================================
+
+var iconVaporeto = L.icon({
+    iconUrl: 'img/vaporeto.png',
+    iconSize: [48, 48],
+    iconAnchor: [24, 24]
+});
+
+var marker6 = L.Marker.movingMarker(lyon, 0,
+    {   icon: iconVaporeto,
+        resize: {max: {zoom: 16, iconSize: [48, 48], iconAnchor: [24, 24]}, min: {zoom: 6, iconSize: [1, 1], iconAnchor: [1, 1]}}
+    }).addTo(map);
+
