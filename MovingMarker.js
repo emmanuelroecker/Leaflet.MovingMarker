@@ -276,9 +276,8 @@ L.Marker.MovingMarker = L.Marker.extend({
      },
      */
 
-    _resizeIcon: function () {
+    _resizeIcon: function (zoom) {
         var resize = this.options.resize;
-        var zoom = map.getZoom();
         var iconSize = [];
         var iconAnchor = [];
 
@@ -317,7 +316,7 @@ L.Marker.MovingMarker = L.Marker.extend({
         L.Marker.prototype.onAdd.call(this, map);
 
         if (this.options.resize) {
-            this._resizeIcon();
+            this._resizeIcon(map.getZoom());
         }
 
         var self = this;
@@ -338,7 +337,7 @@ L.Marker.MovingMarker = L.Marker.extend({
 
         map.on("zoomend", function () {
             if (self.options.resize) {
-                self._resizeIcon();
+                self._resizeIcon(map.getZoom());
             }
             self.resume();
         });
