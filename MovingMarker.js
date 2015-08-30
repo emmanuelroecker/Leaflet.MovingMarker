@@ -46,6 +46,8 @@ L.Marker.MovingMarker = L.Marker.extend({
         this._animId = 0;
         this._animRequested = false;
         this._currentLine = [];
+        this._iconSize = this.options.icon.options.iconSize.slice();
+        this._iconAnchor = this.options.icon.options.iconAnchor.slice();
     },
 
     isRunning: function () {
@@ -263,15 +265,15 @@ L.Marker.MovingMarker = L.Marker.extend({
     },
 
     /*
-    stopTransition: function () {
-        if (this._icon) {
-            this._icon.style[L.DomUtil.TRANSITION] = '';
-        }
-        if (this._shadow) {
-            this._shadow.style[L.DomUtil.TRANSITION] = '';
-        }
-    },
-    */
+     stopTransition: function () {
+     if (this._icon) {
+     this._icon.style[L.DomUtil.TRANSITION] = '';
+     }
+     if (this._shadow) {
+     this._shadow.style[L.DomUtil.TRANSITION] = '';
+     }
+     },
+     */
 
     onAdd: function (map) {
         L.Marker.prototype.onAdd.call(this, map);
@@ -285,26 +287,32 @@ L.Marker.MovingMarker = L.Marker.extend({
             if (self.options.resize) {
                 var resize = self.options.resize;
                 var zoom = map.getZoom();
-                var iconSize = [1, 1];
-                var iconAnchor = [1, 1];
+                var iconSize = [];
+                var iconAnchor = [];
 
                 if (zoom >= resize.max.zoom) {
-                    iconSize = resize.max.iconSize;
-                    iconAnchor = resize.max.iconAnchor;
+                    iconSize = self._iconSize.map(function (size) {
+                        return size * resize.max.size
+                    });
+                    iconAnchor = self._iconAnchor.map(function (size) {
+                        return size * resize.max.size
+                    });
                 } else if (zoom <= resize.min.zoom) {
-                    iconSize = resize.min.iconSize;
-                    iconAnchor = resize.min.iconAnchor;
+                    iconSize = self._iconSize.map(function (size) {
+                        return size * resize.min.size
+                    });
+                    iconAnchor = self._iconAnchor.map(function (size) {
+                        return size * resize.min.size
+                    });
                 } else {
-                    var diffZoom = resize.max.zoom - resize.min.zoom;
-                    var dSize0 = (resize.max.iconSize[0] - resize.min.iconSize[0]) / diffZoom;
-                    var dSize1 = (resize.max.iconSize[1] - resize.min.iconSize[1]) / diffZoom;
-                    var dAnchor0 = (resize.max.iconAnchor[0] - resize.min.iconAnchor[0]) / diffZoom;
-                    var dAnchor1 = (resize.max.iconAnchor[1] - resize.min.iconAnchor[1]) / diffZoom;
+                    var dSize = resize.min.size + (zoom - resize.min.zoom) * (resize.max.size - resize.min.size) / (resize.max.zoom - resize.min.zoom);
 
-                    iconSize[0] = resize.min.iconSize[0] + (zoom - resize.min.zoom) * dSize0;
-                    iconSize[1] = resize.min.iconSize[1] + (zoom - resize.min.zoom) * dSize1;
-                    iconAnchor[0] = resize.min.iconAnchor[0] + (zoom - resize.min.zoom) * dAnchor0;
-                    iconAnchor[1] = resize.min.iconAnchor[1] + (zoom - resize.min.zoom) * dAnchor1;
+                    iconSize = self._iconSize.map(function (size) {
+                        return size * dSize;
+                    });
+                    iconAnchor = self._iconAnchor.map(function (size) {
+                        return size * dSize;
+                    });
                 }
 
                 var icon = self.options.icon;

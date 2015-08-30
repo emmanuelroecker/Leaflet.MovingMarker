@@ -141,6 +141,6 @@ var iconVaporeto = L.icon({
 
 var marker6 = L.Marker.movingMarker(lyon, 0,
     {   icon: iconVaporeto,
-        resize: {max: {zoom: 16, iconSize: [48, 48], iconAnchor: [24, 24]}, min: {zoom: 6, iconSize: [1, 1], iconAnchor: [1, 1]}}
+        resize: {max: {zoom: 16, size: 1.0}, min: {zoom: 6, size: 0.1}}
     }).addTo(map);
 
